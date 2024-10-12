@@ -36,7 +36,69 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
         textToSpeech.shutdown()
     }
 
-    // New method to save TTS output to a file
+    fun setLanguage(language: String) {
+        val locale = when (language.lowercase()) {
+            "english" -> Locale("en")
+            "spanish" -> Locale("es")
+            "french" -> Locale("fr")
+            "german" -> Locale("de")
+            "hindi" -> Locale("hi")
+            "arabic" -> Locale("ar")
+            "bengali" -> Locale("bn")
+            "chinese" -> Locale("zh")
+            "dutch" -> Locale("nl")
+            "italian" -> Locale("it")
+            "japanese" -> Locale("ja")
+            "korean" -> Locale("ko")
+            "malay" -> Locale("ms")
+            "portuguese" -> Locale("pt")
+            "russian" -> Locale("ru")
+            "turkish" -> Locale("tr")
+            "vietnamese" -> Locale("vi")
+            "thai" -> Locale("th")
+            "filipino" -> Locale("tl")
+            "swedish" -> Locale("sv")
+            "norwegian" -> Locale("no")
+            "danish" -> Locale("da")
+            "finnish" -> Locale("fi")
+            "hebrew" -> Locale("iw")
+            "swahili" -> Locale("sw")
+            "ukrainian" -> Locale("uk")
+            "czech" -> Locale("cs")
+            "hungarian" -> Locale("hu")
+            "romanian" -> Locale("ro")
+            "slovak" -> Locale("sk")
+            "bulgarian" -> Locale("bg")
+            "croatian" -> Locale("hr")
+            "serbian" -> Locale("sr")
+            "slovenian" -> Locale("sl")
+            "lithuanian" -> Locale("lt")
+            "latvian" -> Locale("lv")
+            "estonian" -> Locale("et")
+            "persian" -> Locale("fa")
+            "telugu" -> Locale("te")
+            "tamil" -> Locale("ta")
+            "marathi" -> Locale("mr")
+            "kannada" -> Locale("kn")
+            "punjabi" -> Locale("pa")
+            "gujarati" -> Locale("gu")
+            "burmese" -> Locale("my")
+            "armenian" -> Locale("hy")
+            "georgian" -> Locale("ka")
+            "khmer" -> Locale("km")
+            "lao" -> Locale("lo")
+            "malagasy" -> Locale("mg")
+            "sinhala" -> Locale("si")
+            "tigrinya" -> Locale("ti")
+            "yiddish" -> Locale("yi")
+            else -> Locale("en") // Default to English
+        }
+
+        val result = textToSpeech.setLanguage(locale)
+        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            println("Language not supported: $locale")
+        }
+    }
 
 
     fun saveTextToSpeechToFile(text: String) {

@@ -91,6 +91,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO_PERMISSION)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
+            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission required to use speech recognition", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun handleTextInput(isLeft: Boolean) {
         // Get the text from the corresponding EditText
         val inputText = if (isLeft) {
@@ -105,9 +120,11 @@ class MainActivity : AppCompatActivity() {
 
         // Check if input text is not empty
         if (inputText.isNotEmpty()) {
+            // Set the language for TTS
+            textToSpeechManager.setLanguage(targetLanguage)  // Set to target language for speaking
+
             // Perform translation
             translate.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
-                // Ensure UI updates happen on the main thread
                 runOnUiThread {
                     if (isLeft) {
                         rightTextBox.text = translatedText
@@ -127,24 +144,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkPermissions() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO_PERMISSION)
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
-            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission required to use speech recognition", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private fun handleButtonClick(isLeft: Boolean) {
         val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
         val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
+
+        // Set the language for TTS
+        textToSpeechManager.setLanguage(targetLanguage) // Set to target language for speaking
 
         speechRecognition.recognizeSpeech { recognizedText ->
             // Update the left or right text box
@@ -155,7 +160,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             translate.translateText(recognizedText, sourceLanguage, targetLanguage) { translatedText ->
-                // Ensure UI updates happen on the main thread
                 runOnUiThread {
                     if (isLeft) {
                         rightTextBox.text = translatedText
@@ -175,14 +179,63 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun getLanguagesArray(): Array<String> {
-        return arrayOf("English", "Spanish", "French", "German", "Hindi")
+        return arrayOf(
+            "English",
+            "Spanish",
+            "French",
+            "German",
+            "Hindi",
+            "Arabic",
+            "Bengali",
+            "Chinese",
+            "Dutch",
+            "Italian",
+            "Japanese",
+            "Korean",
+            "Malay",
+            "Portuguese",
+            "Russian",
+            "Turkish",
+            "Vietnamese",
+            "Thai",
+            "Filipino",
+            "Swedish",
+            "Norwegian",
+            "Danish",
+            "Finnish",
+            "Hebrew",
+            "Swahili",
+            "Ukrainian",
+            "Czech",
+            "Hungarian",
+            "Romanian",
+            "Slovak",
+            "Bulgarian",
+            "Croatian",
+            "Serbian",
+            "Slovenian",
+            "Lithuanian",
+            "Latvian",
+            "Estonian",
+            "Persian",
+            "Telugu",
+            "Tamil",
+            "Marathi",
+            "Kannada",
+            "Punjabi",
+            "Gujarati",
+            "Burmese",
+            "Armenian",
+            "Georgian",
+            "Khmer",
+            "Lao",
+            "Malagasy",
+            "Sinhala",
+            "Tigrinya",
+            "Yiddish"
+        )
     }
-
-
-
 
     override fun onDestroy() {
         super.onDestroy()
