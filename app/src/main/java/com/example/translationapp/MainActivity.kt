@@ -23,6 +23,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rightTextBox: TextView
     private lateinit var leftLanguageDropdown: Spinner
     private lateinit var rightLanguageDropdown: Spinner
+    private lateinit var leftEditText: EditText
+    private lateinit var rightEditText: EditText
+    private lateinit var leftSendButton: Button
+    private lateinit var rightSendButton: Button
+    private lateinit var leftButton: Button // Declare the left button
+    private lateinit var rightButton: Button
 
     private val REQUEST_RECORD_AUDIO_PERMISSION = 200
     private val permissions = arrayOf(android.Manifest.permission.RECORD_AUDIO)
@@ -38,12 +44,25 @@ class MainActivity : AppCompatActivity() {
         audioPlayer = AudioPlayer(this)
 
         // Find UI elements by ID
-        val leftButton: Button = findViewById(R.id.leftButton)
-        val rightButton: Button = findViewById(R.id.rightButton)
+        leftButton = findViewById(R.id.leftButton)
+        rightButton = findViewById(R.id.rightButton)
         leftTextBox = findViewById(R.id.leftTextBox)
         rightTextBox = findViewById(R.id.rightTextBox)
         leftLanguageDropdown = findViewById(R.id.leftLanguageDropdown)
         rightLanguageDropdown = findViewById(R.id.rightLanguageDropdown)
+        leftEditText = findViewById(R.id.leftEditText)
+        rightEditText = findViewById(R.id.rightEditText)
+        leftSendButton = findViewById(R.id.leftSendButton)
+        rightSendButton = findViewById(R.id.rightSendButton)
+
+        // Handle Send button clicks for text input
+        leftSendButton.setOnClickListener {
+            handleTextInput(isLeft = true)
+        }
+
+        rightSendButton.setOnClickListener {
+            handleTextInput(isLeft = false)
+        }
 
         // Set up language dropdowns
         leftLanguageDropdown.adapter = ArrayAdapter(
@@ -69,6 +88,42 @@ class MainActivity : AppCompatActivity() {
 
         rightButton.setOnClickListener {
             handleButtonClick(isLeft = false)
+        }
+    }
+
+    private fun handleTextInput(isLeft: Boolean) {
+        // Get the text from the corresponding EditText
+        val inputText = if (isLeft) {
+            leftEditText.text.toString().trim()
+        } else {
+            rightEditText.text.toString().trim()
+        }
+
+        // Get the source and target languages
+        val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
+        val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
+
+        // Check if input text is not empty
+        if (inputText.isNotEmpty()) {
+            // Perform translation
+            translate.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
+                // Ensure UI updates happen on the main thread
+                runOnUiThread {
+                    if (isLeft) {
+                        rightTextBox.text = translatedText
+                    } else {
+                        leftTextBox.text = translatedText
+                    }
+
+                    // Save the translated text to a file
+                    textToSpeechManager.saveTextToSpeechToFile(translatedText)
+
+                    // Speak the translated text
+                    textToSpeechManager.speak(translatedText)
+                }
+            }
+        } else {
+            Toast.makeText(this, "Please enter text to translate.", Toast.LENGTH_SHORT).show()
         }
     }
 

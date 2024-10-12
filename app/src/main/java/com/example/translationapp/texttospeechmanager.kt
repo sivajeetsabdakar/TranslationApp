@@ -40,8 +40,11 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
 
 
     fun saveTextToSpeechToFile(text: String) {
+        // Get the internal storage directory for the app
+        val internalFilesDir = context.filesDir
+
         // Specify the file where the TTS output will be saved
-        val file = File(context.filesDir, "tts_output.wav") // Save in app's internal storage
+        val file = File(internalFilesDir, "tts_output.wav")
 
         // Ensure the parent directory exists
         if (!file.parentFile.exists()) {
@@ -58,7 +61,7 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
             val result = textToSpeech.synthesizeToFile(
                 text,
                 params,
-                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_WRITE),
+                file,
                 "tts_output"
             )
 
@@ -73,7 +76,10 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
         } catch (e: Exception) {
             e.printStackTrace() // Print stack trace for debugging
         }
+
     }
+
+
 
 
 }
