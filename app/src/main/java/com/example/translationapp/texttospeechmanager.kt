@@ -102,7 +102,6 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
 
 
     fun saveTextToSpeechToFile(text: String) {
-        // Get the internal storage directory for the app
         val internalFilesDir = context.filesDir
 
         // Specify the file where the TTS output will be saved

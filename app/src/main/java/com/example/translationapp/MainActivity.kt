@@ -2,16 +2,16 @@ package com.example.translationapp
 
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.Gravity
+//import android.view.Gravity
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Locale
+//import kotlinx.coroutines.CoroutineScope
+//import kotlinx.coroutines.Dispatchers
+//import kotlinx.coroutines.launch
+//import kotlinx.coroutines.withContext
+//import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -91,11 +91,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkPermissions() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO_PERMISSION)
-        }
-    }
+//    private fun checkPermissions() {
+//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO_PERMISSION)
+//        }
+//    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
