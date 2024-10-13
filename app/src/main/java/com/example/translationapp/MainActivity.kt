@@ -6,12 +6,13 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 //import kotlinx.coroutines.CoroutineScope
 //import kotlinx.coroutines.Dispatchers
 //import kotlinx.coroutines.launch
 //import kotlinx.coroutines.withContext
 //import java.util.Locale
+import androidx.core.content.ContextCompat
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rightEditText: EditText
     private lateinit var leftSendButton: Button
     private lateinit var rightSendButton: Button
-    private lateinit var leftButton: Button // Declare the left button
+    private lateinit var leftButton: Button
     private lateinit var rightButton: Button
 
     private val REQUEST_RECORD_AUDIO_PERMISSION = 200
@@ -70,6 +71,7 @@ class MainActivity : AppCompatActivity() {
             android.R.layout.simple_spinner_dropdown_item,
             getLanguagesArray()
         )
+
         rightLanguageDropdown.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
@@ -151,7 +153,10 @@ class MainActivity : AppCompatActivity() {
         // Set the language for TTS
         textToSpeechManager.setLanguage(targetLanguage) // Set to target language for speaking
 
-        speechRecognition.recognizeSpeech { recognizedText ->
+        // Get the corresponding locale code for the selected source language
+        val languageCode = getLanguageCode(sourceLanguage)
+
+        speechRecognition.recognizeSpeech(languageCode) { recognizedText ->
             // Update the left or right text box
             if (isLeft) {
                 leftTextBox.text = recognizedText
@@ -176,6 +181,65 @@ class MainActivity : AppCompatActivity() {
                     textToSpeechManager.speak(translatedText)
                 }
             }
+        }
+    }
+
+    private fun getLanguageCode(language: String): String {
+        return when (language.lowercase()) {
+            "english" -> "en"
+            "spanish" -> "es"
+            "french" -> "fr"
+            "german" -> "de"
+            "hindi" -> "hi"
+            "arabic" -> "ar"
+            "bengali" -> "bn"
+            "chinese" -> "zh"
+            "dutch" -> "nl"
+            "italian" -> "it"
+            "japanese" -> "ja"
+            "korean" -> "ko"
+            "malay" -> "ms"
+            "portuguese" -> "pt"
+            "russian" -> "ru"
+            "turkish" -> "tr"
+            "vietnamese" -> "vi"
+            "thai" -> "th"
+            "filipino" -> "tl"
+            "swedish" -> "sv"
+            "norwegian" -> "no"
+            "danish" -> "da"
+            "finnish" -> "fi"
+            "hebrew" -> "iw"
+            "swahili" -> "sw"
+            "ukrainian" -> "uk"
+            "czech" -> "cs"
+            "hungarian" -> "hu"
+            "romanian" -> "ro"
+            "slovak" -> "sk"
+            "bulgarian" -> "bg"
+            "croatian" -> "hr"
+            "serbian" -> "sr"
+            "slovenian" -> "sl"
+            "lithuanian" -> "lt"
+            "latvian" -> "lv"
+            "estonian" -> "et"
+            "persian" -> "fa"
+            "telugu" -> "te"
+            "tamil" -> "ta"
+            "marathi" -> "mr"
+            "kannada" -> "kn"
+            "punjabi" -> "pa"
+            "gujarati" -> "gu"
+            "burmese" -> "my"
+            "armenian" -> "hy"
+            "georgian" -> "ka"
+            "khmer" -> "km"
+            "lao" -> "lo"
+            "malagasy" -> "mg"
+            "sinhala" -> "si"
+            "tigrinya" -> "ti"
+            "yiddish" -> "yi"
+            else -> "en"  // Default to English if not found
         }
     }
 
