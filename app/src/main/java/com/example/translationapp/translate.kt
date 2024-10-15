@@ -18,8 +18,8 @@ class Translate {
             .build()
 
         val request = Request.Builder()
-            .url("http://10.0.2.2:5000/translate")  // Use the emulator IP address
-//            .url("http://192.168.1.4:5000/translate") // D104 5G
+//            .url("http://10.0.2.2:5000/translate")  // Use the emulator IP address
+            .url("http://192.168.1.6:5000/translate") // D104 5G
             .post(requestBody)
             .build()
 

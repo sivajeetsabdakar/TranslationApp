@@ -2,4 +2,6 @@
 
 <resources>
     <string name="app_name">TranslationApp</string>
+    <string name="Usernasme">Usernasme</string>
+    <string name="Password">Password</string>
 </resources>
