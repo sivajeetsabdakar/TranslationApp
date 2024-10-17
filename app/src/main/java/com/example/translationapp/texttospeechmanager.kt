@@ -118,7 +118,6 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
         }
 
         try {
-            // Synthesize the speech and save it to a file
             val result = textToSpeech.synthesizeToFile(
                 text,
                 params,
@@ -126,9 +125,7 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
                 "tts_output"
             )
 
-            // Check the result of the synthesis
             if (result == TextToSpeech.SUCCESS) {
-                // Successfully saved
                 println("TTS audio saved to ${file.absolutePath}")
             } else {
                 // Handle failure
@@ -139,8 +136,5 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
         }
 
     }
-
-
-
 
 }
