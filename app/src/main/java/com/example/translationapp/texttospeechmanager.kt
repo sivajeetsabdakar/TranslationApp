@@ -101,40 +101,4 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
     }
 
 
-    fun saveTextToSpeechToFile(text: String) {
-        val internalFilesDir = context.filesDir
-
-        // Specify the file where the TTS output will be saved
-        val file = File(internalFilesDir, "tts_output.wav")
-
-        // Ensure the parent directory exists
-        if (!file.parentFile.exists()) {
-            file.parentFile.mkdirs() // Create the directory
-        }
-
-        // Create a Bundle for parameters
-        val params = Bundle().apply {
-            putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "tts_output")
-        }
-
-        try {
-            val result = textToSpeech.synthesizeToFile(
-                text,
-                params,
-                file,
-                "tts_output"
-            )
-
-            if (result == TextToSpeech.SUCCESS) {
-                println("TTS audio saved to ${file.absolutePath}")
-            } else {
-                // Handle failure
-                println("Failed to save TTS audio")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace() // Print stack trace for debugging
-        }
-
-    }
-
 }

@@ -134,8 +134,6 @@ class MainActivity : AppCompatActivity() {
                         leftTextBox.text = translatedText
                     }
 
-                    // Save the translated text to a file
-                    textToSpeechManager.saveTextToSpeechToFile(translatedText)
 
                     // Speak the translated text
                     textToSpeechManager.speak(translatedText)
@@ -173,9 +171,6 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     audioPlayer.setAudioRouting(isLeft)
-
-                    // Save the translated text to a file
-                    textToSpeechManager.saveTextToSpeechToFile(translatedText)
 
                     // Speak the translated text
                     textToSpeechManager.speak(translatedText)
