@@ -1,5 +1,7 @@
 package com.example.translationapp
 
+import AudioPlayer
+import TextToSpeechManager
 import android.content.pm.PackageManager
 import android.os.Bundle
 //import android.view.Gravity
@@ -109,34 +111,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleTextInput(isLeft: Boolean) {
-        // Get the text from the corresponding EditText
         val inputText = if (isLeft) {
             leftEditText.text.toString().trim()
         } else {
             rightEditText.text.toString().trim()
         }
 
-        // Get the source and target languages
         val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
         val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
 
-        // Check if input text is not empty
         if (inputText.isNotEmpty()) {
-            // Set the language for TTS
-            textToSpeechManager.setLanguage(targetLanguage)  // Set to target language for speaking
+            textToSpeechManager.setLanguage(targetLanguage)
 
-            // Perform translation
             translate.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
                 runOnUiThread {
                     if (isLeft) {
                         rightTextBox.text = translatedText
+                        textToSpeechManager.speak(translatedText, true)
                     } else {
                         leftTextBox.text = translatedText
+                        textToSpeechManager.speak(translatedText, false)
                     }
 
 
                     // Speak the translated text
-                    textToSpeechManager.speak(translatedText)
+
                 }
             }
         } else {
@@ -148,14 +147,11 @@ class MainActivity : AppCompatActivity() {
         val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
         val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
 
-        // Set the language for TTS
-        textToSpeechManager.setLanguage(targetLanguage) // Set to target language for speaking
+        textToSpeechManager.setLanguage(targetLanguage)
 
-        // Get the corresponding locale code for the selected source language
         val languageCode = getLanguageCode(sourceLanguage)
 
         speechRecognition.recognizeSpeech(languageCode) { recognizedText ->
-            // Update the left or right text box
             if (isLeft) {
                 leftTextBox.text = recognizedText
             } else {
@@ -166,18 +162,18 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     if (isLeft) {
                         rightTextBox.text = translatedText
+                        textToSpeechManager.speak(translatedText, true)
+
                     } else {
                         leftTextBox.text = translatedText
+                        textToSpeechManager.speak(translatedText, false)
                     }
 
-                    audioPlayer.setAudioRouting(isLeft)
-
-                    // Speak the translated text
-                    textToSpeechManager.speak(translatedText)
                 }
             }
         }
     }
+
 
     private fun getLanguageCode(language: String): String {
         return when (language.lowercase()) {

@@ -1,16 +1,16 @@
-package com.example.translationapp
-
 import android.content.Context
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.OnInitListener
+import android.util.Log
 import java.io.File
 import java.util.Locale
 
 class TextToSpeechManager(private val context: Context) : OnInitListener {
 
     private val textToSpeech: TextToSpeech = TextToSpeech(context, this)
+    private val audioPlayer: AudioPlayer = AudioPlayer(context)
 
     init {
         // Set up the TextToSpeech object
@@ -22,12 +22,48 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
             textToSpeech.language = Locale.getDefault()
         } else {
             // Handle initialization failure
+            Log.e("TTS", "Initialization failed")
         }
     }
 
-    fun speak(text: String) {
-        // Convert text to speech
-        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+    fun speak(text: String, isLeft: Boolean) {
+        // Convert text to speech and save it as audio file
+        val file = File(context.cacheDir, "tts_output.wav")
+
+        // Create a Bundle for parameters
+        val params = Bundle().apply {
+            putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, text) // Use text as utterance ID
+        }
+
+        // Call synthesizeToFile with the correct parameters
+        val result = textToSpeech.synthesizeToFile(text, params, file, text)
+
+        // Check if the request was queued successfully
+        if (result == TextToSpeech.SUCCESS) {
+            // Wait for the file to be created
+            textToSpeech.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
+                override fun onDone(utteranceId: String?) {
+                    // Read the file's content into a byte array
+                    val audioData = file.readBytes()
+
+                    // Play the audio with panning (left or right)
+                    audioPlayer.playWithStereoPanning(isLeft, audioData)
+
+                    // Cleanup file
+                    file.delete()
+                }
+
+                override fun onError(utteranceId: String?) {
+                    Log.e("TTS", "Error in TTS")
+                }
+
+                override fun onStart(utteranceId: String?) {
+                    // Optionally handle start
+                }
+            })
+        } else {
+            Log.e("TTS", "Error in queuing TTS operation")
+        }
     }
 
     fun shutdown() {
@@ -99,6 +135,4 @@ class TextToSpeechManager(private val context: Context) : OnInitListener {
             println("Language not supported: $locale")
         }
     }
-
-
 }
