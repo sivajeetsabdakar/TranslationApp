@@ -1,7 +1,9 @@
 package com.example.translationapp
 
+import Translate
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 //import android.view.Gravity
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -12,13 +14,15 @@ import androidx.core.app.ActivityCompat
 //import kotlinx.coroutines.withContext
 //import java.util.Locale
 import androidx.core.content.ContextCompat
+import java.util.Locale
+//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var speechRecognition: SpeechRecognition
     private lateinit var translate: Translate
-    private lateinit var textToSpeechManager: TextToSpeechManager
+    private lateinit var translatorManager: TranslatorManager
     private lateinit var audioPlayer: AudioPlayer
     private lateinit var leftTextBox: TextView
     private lateinit var rightTextBox: TextView
@@ -30,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rightSendButton: Button
     private lateinit var leftButton: Button
     private lateinit var rightButton: Button
+    private lateinit var textToSpeech: TextToSpeech
 
     private val REQUEST_RECORD_AUDIO_PERMISSION = 200
     private val permissions = arrayOf(android.Manifest.permission.RECORD_AUDIO)
@@ -38,11 +43,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Translate, SpeechRecognition, and TextToSpeechManager
+        // Initialize Translate, SpeechRecognition, and TranslatorManager
         translate = Translate()
         speechRecognition = SpeechRecognition(this)
-        textToSpeechManager = TextToSpeechManager(this)
-        audioPlayer = AudioPlayer(this)
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                textToSpeech.language = Locale.ENGLISH // Default language
+            } else {
+                Toast.makeText(this, "TTS Initialization failed!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        translatorManager = TranslatorManager(speechRecognition, textToSpeech, translate)
+
 
         // Find UI elements by ID
         leftButton = findViewById(R.id.leftButton)
@@ -109,75 +121,42 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleTextInput(isLeft: Boolean) {
-        // Get the text from the corresponding EditText
-        val inputText = if (isLeft) {
-            leftEditText.text.toString().trim()
-        } else {
-            rightEditText.text.toString().trim()
-        }
-
-        // Get the source and target languages
+        val inputText = if (isLeft) leftEditText.text.toString().trim() else rightEditText.text.toString().trim()
         val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
         val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
 
-        // Check if input text is not empty
         if (inputText.isNotEmpty()) {
-            // Set the language for TTS
-            textToSpeechManager.setLanguage(targetLanguage)  // Set to target language for speaking
-
-            // Perform translation
-            translate.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
-                runOnUiThread {
-                    if (isLeft) {
-                        rightTextBox.text = translatedText
-                    } else {
-                        leftTextBox.text = translatedText
-                    }
-
-
-                    // Speak the translated text
-                    textToSpeechManager.speak(translatedText)
-                }
-            }
+            translatorManager.processSpeechInput(inputText, getLanguageCode(sourceLanguage), getLanguageCode(targetLanguage))
         } else {
             Toast.makeText(this, "Please enter text to translate.", Toast.LENGTH_SHORT).show()
         }
     }
 
+
     private fun handleButtonClick(isLeft: Boolean) {
         val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
         val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
 
-        // Set the language for TTS
-        textToSpeechManager.setLanguage(targetLanguage) // Set to target language for speaking
+        val sourceLanguageCode = getLanguageCode(sourceLanguage)
+        val targetLanguageCode = getLanguageCode(targetLanguage)
 
-        // Get the corresponding locale code for the selected source language
-        val languageCode = getLanguageCode(sourceLanguage)
-
-        speechRecognition.recognizeSpeech(languageCode) { recognizedText ->
-            // Update the left or right text box
-            if (isLeft) {
-                leftTextBox.text = recognizedText
-            } else {
-                rightTextBox.text = recognizedText
-            }
-
-            translate.translateText(recognizedText, sourceLanguage, targetLanguage) { translatedText ->
-                runOnUiThread {
-                    if (isLeft) {
-                        rightTextBox.text = translatedText
-                    } else {
-                        leftTextBox.text = translatedText
-                    }
-
-                    audioPlayer.setAudioRouting(isLeft)
-
-                    // Speak the translated text
-                    textToSpeechManager.speak(translatedText)
+        // Start continuous speech recognition
+        speechRecognition.startListening(sourceLanguageCode) { recognizedText ->
+            runOnUiThread {
+                if (isLeft) {
+                    leftTextBox.text = recognizedText
+                } else {
+                    rightTextBox.text = recognizedText
                 }
             }
+
+            // Process translation through TranslatorManager
+            translatorManager.processSpeechInput(recognizedText, sourceLanguageCode, targetLanguageCode)
         }
     }
+
+
+
 
     private fun getLanguageCode(language: String): String {
         return when (language.lowercase()) {
@@ -290,7 +269,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        speechRecognition.destroy()
-        textToSpeechManager.shutdown()
+        // Shutdown TTS to free up resources
+        if (::textToSpeech.isInitialized) {
+            textToSpeech.stop()
+            textToSpeech.shutdown()
+        }
     }
 }

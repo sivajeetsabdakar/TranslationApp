@@ -1,5 +1,3 @@
-package com.example.translationapp
-
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -18,8 +16,7 @@ class Translate {
             .build()
 
         val request = Request.Builder()
-            .url("http://10.0.2.2:5000/translate")  // Use the emulator IP address
-//            .url("http://192.168.1.4:5000/translate") // D104 5G
+            .url("http://10.0.2.2:5000/translate")  // Emulator IP, change for production
             .post(requestBody)
             .build()
 
@@ -40,6 +37,7 @@ class Translate {
             }
         })
     }
+
 
     // Map languages to their respective ISO language codes
     private fun mapLanguage(language: String): String {
@@ -91,6 +89,4 @@ class Translate {
             else -> "en"
         }
     }
-
-
 }
