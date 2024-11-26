@@ -1,9 +1,27 @@
 package com.example.translationapp
 
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import android.Manifest
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.translationapp.ui.theme.TranslationAppTheme
 import Translate
 //import TranslatorManager
 import android.content.pm.PackageManager
-import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -12,96 +30,211 @@ import androidx.core.content.ContextCompat
 import java.util.Locale
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
-    private lateinit var speechRecognition: SpeechRecognition
-    private lateinit var translate: Translate
-//    private lateinit var translatorManager: TranslatorManager
-    private lateinit var audioPlayer: AudioPlayer
-    private lateinit var leftTextBox: TextView
-    private lateinit var rightTextBox: TextView
-    private lateinit var leftLanguageDropdown: Spinner
-    private lateinit var rightLanguageDropdown: Spinner
-    private lateinit var leftEditText: EditText
-    private lateinit var rightEditText: EditText
-    private lateinit var leftSendButton: Button
-    private lateinit var rightSendButton: Button
-    private lateinit var leftButton: Button
-    private lateinit var rightButton: Button
     private lateinit var textToSpeech: TextToSpeech
-
-    private val REQUEST_RECORD_AUDIO_PERMISSION = 200
-    private val permissions = arrayOf(android.Manifest.permission.RECORD_AUDIO)
+    private lateinit var translate: Translate
+    private lateinit var speechRecognition: SpeechRecognition
+    private lateinit var audioPlayer: AudioPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        // Initialize Translate, SpeechRecognition, and TranslatorManager
-        translate = Translate()
-        speechRecognition = SpeechRecognition(this)
+        // Initialize essential components
         textToSpeech = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                textToSpeech.language = Locale.ENGLISH // Default language
+                textToSpeech.language = Locale.ENGLISH
             } else {
                 Toast.makeText(this, "TTS Initialization failed!", Toast.LENGTH_SHORT).show()
             }
         }
-//        translatorManager = TranslatorManager(speechRecognition, textToSpeech, translate)
-
-        textToSpeech = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                textToSpeech.language = Locale.ENGLISH // Default language
-            }
-        }
+        translate = Translate()
+        speechRecognition = SpeechRecognition(this)
         audioPlayer = AudioPlayer(this, textToSpeech)
 
-        // Find UI elements by ID
-        leftButton = findViewById(R.id.leftButton)
-        rightButton = findViewById(R.id.rightButton)
-        leftTextBox = findViewById(R.id.leftTextBox)
-        rightTextBox = findViewById(R.id.rightTextBox)
-        leftLanguageDropdown = findViewById(R.id.leftLanguageDropdown)
-        rightLanguageDropdown = findViewById(R.id.rightLanguageDropdown)
-        leftEditText = findViewById(R.id.leftEditText)
-        rightEditText = findViewById(R.id.rightEditText)
-        leftSendButton = findViewById(R.id.leftSendButton)
-        rightSendButton = findViewById(R.id.rightSendButton)
-
-        // Handle Send button clicks for text input
-        leftSendButton.setOnClickListener {
-            handleTextInput(isLeft = true)
+        // Check for audio permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 200)
         }
 
-        rightSendButton.setOnClickListener {
-            handleTextInput(isLeft = false)
+        // Set Jetpack Compose content
+        setContent {
+            TranslationAppUI()
         }
+    }
 
-        // Set up language dropdowns
-        leftLanguageDropdown.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_dropdown_item,
-            getLanguagesArray()
-        )
+    @Composable
+    fun TranslationAppUI() {
+        val context = LocalContext.current
 
-        rightLanguageDropdown.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_dropdown_item,
-            getLanguagesArray()
-        )
+        // State variables for inputs and outputs
+        var leftText by remember { mutableStateOf("") }
+        var rightText by remember { mutableStateOf("") }
+        var leftLanguage by remember { mutableStateOf("English") }
+        var rightLanguage by remember { mutableStateOf("Spanish") }
+        val languages = getLanguagesArray()
 
-        // Check if RECORD_AUDIO permission is granted
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Language Dropdowns
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LanguageDropdown(
+                        label = "Left Language",
+                        selectedLanguage = leftLanguage,
+                        onLanguageSelected = { leftLanguage = it },
+                        languages = languages
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LanguageDropdown(
+                        label = "Right Language",
+                        selectedLanguage = rightLanguage,
+                        onLanguageSelected = { rightLanguage = it },
+                        languages = languages
+                    )
+                }
+            }
+
+            // Text Inputs and Buttons for Translation
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TextField(
+                        value = leftText,
+                        onValueChange = { leftText = it },
+                        label = { Text("Left Text") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Button(
+                        onClick = {
+                            if (leftText.isNotEmpty()) {
+                                handleTextInput(
+                                    inputText = leftText,
+                                    sourceLanguage = leftLanguage,
+                                    targetLanguage = rightLanguage,
+                                    onTranslationResult = { rightText = it }
+                                )
+                            } else {
+                                Toast.makeText(context, "Enter text to translate.", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Left Send")
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TextField(
+                        value = rightText,
+                        onValueChange = { rightText = it },
+                        label = { Text("Right Text") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Button(
+                        onClick = {
+                            if (rightText.isNotEmpty()) {
+                                handleTextInput(
+                                    inputText = rightText,
+                                    sourceLanguage = rightLanguage,
+                                    targetLanguage = leftLanguage,
+                                    onTranslationResult = { leftText = it }
+                                )
+                            } else {
+                                Toast.makeText(context, "Enter text to translate.", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Right Send")
+                    }
+                }
+            }
+
+            // Buttons for Speech Input
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = {
+                        handleSpeechInput(
+                            sourceLanguage = leftLanguage,
+                            targetLanguage = rightLanguage,
+                            isLeft = true,
+                            onResult = { leftText = it }
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Left Speech")
+                }
+                Button(
+                    onClick = {
+                        handleSpeechInput(
+                            sourceLanguage = rightLanguage,
+                            targetLanguage = leftLanguage,
+                            isLeft = false,
+                            onResult = { rightText = it }
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Right Speech")
+                }
+            }
         }
+    }
 
-        leftButton.setOnClickListener {
-            handleButtonClick(isLeft = true)
-        }
+    @Composable
+    fun LanguageDropdown(label: String, selectedLanguage: String, onLanguageSelected: (String) -> Unit, languages: Array<String>) {
+        var expanded by remember { mutableStateOf(false) }
 
-        rightButton.setOnClickListener {
-            handleButtonClick(isLeft = false)
+        Column {
+            Text(label, style = MaterialTheme.typography.caption)
+            Box {
+                Text(
+                    text = selectedLanguage,
+                    modifier = Modifier.fillMaxWidth().clickable { expanded = true },
+                    style = MaterialTheme.typography.body1
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    languages.forEach { language ->
+                        DropdownMenuItem(onClick = {
+                            onLanguageSelected(language)
+                            expanded = false
+                        }) {
+                            Text(language)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -111,65 +244,32 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
-            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission required to use speech recognition", Toast.LENGTH_SHORT).show()
-            }
+//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
+//            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+//                Toast.makeText(this, "Permission required to use speech recognition", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//    }
+
+    private fun handleTextInput(inputText: String, sourceLanguage: String, targetLanguage: String, onTranslationResult: (String) -> Unit) {
+        translate.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
+            runOnUiThread { onTranslationResult(translatedText) }
+            val locale = Locale.forLanguageTag(getLanguageCode(targetLanguage))
+            audioPlayer.speakThroughEarphone(translatedText, true, locale)
         }
     }
 
-    private fun handleTextInput(isLeft: Boolean) {
-        val inputText = if (isLeft) leftEditText.text.toString().trim() else rightEditText.text.toString().trim()
-        val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
-        val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
 
-        if (inputText.isNotEmpty()) {
-            val translator = Translate()
-            translator.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
-                runOnUiThread {
-                    if (isLeft) {
-                        rightEditText.setText(translatedText)
-                    } else {
-                        leftEditText.setText(translatedText)
-                    }
-                }
+    private fun handleSpeechInput(sourceLanguage: String, targetLanguage: String, isLeft: Boolean, onResult: (String) -> Unit) {
+        val sourceLanguageCode = getLanguageCodeforSR(sourceLanguage)
+        speechRecognition.recognizeSpeech(sourceLanguageCode) { recognizedText ->
+            onResult(recognizedText)
+            translate.translateText(recognizedText, sourceLanguage, targetLanguage) { translatedText ->
+                runOnUiThread { if (isLeft) onResult(translatedText) }
                 val locale = Locale.forLanguageTag(getLanguageCode(targetLanguage))
                 audioPlayer.speakThroughEarphone(translatedText, isLeft, locale)
-            }
-        } else {
-            Toast.makeText(this, "Please enter text to translate.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-    private fun handleButtonClick(isLeft: Boolean) {
-        val sourceLanguage = if (isLeft) leftLanguageDropdown.selectedItem.toString() else rightLanguageDropdown.selectedItem.toString()
-        val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
-
-        val sourceLanguageCode = getLanguageCode(sourceLanguage)
-        val targetLanguageCode = getLanguageCode(targetLanguage)
-        val sourceLanguageCodeforSR = getLanguageCodeforSR(sourceLanguage)
-
-        // Start continuous speech recognition
-        speechRecognition.recognizeSpeech(sourceLanguageCodeforSR) { recognizedText ->
-            if (isLeft) {
-                leftTextBox.text = recognizedText
-            } else {
-                rightTextBox.text = recognizedText
-            }
-            translate.translateText(recognizedText, sourceLanguage, targetLanguage) { translatedText ->
-                runOnUiThread {
-                    if (isLeft) {
-                        rightTextBox.text = translatedText
-                    } else {
-                        leftTextBox.text = translatedText
-                    }
-
-                    val locale = Locale.forLanguageTag(getLanguageCode(targetLanguage))
-                    audioPlayer.speakThroughEarphone(translatedText, isLeft, locale)
-                }
             }
         }
     }
