@@ -1,5 +1,6 @@
 package com.example.translationapp
 
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
