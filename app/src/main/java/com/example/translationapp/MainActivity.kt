@@ -1,7 +1,7 @@
 package com.example.translationapp
 
 import Translate
-import TranslatorManager
+//import TranslatorManager
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioManager
@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var speechRecognition: SpeechRecognition
     private lateinit var translate: Translate
-    private lateinit var translatorManager: TranslatorManager
+//    private lateinit var translatorManager: TranslatorManager
     private lateinit var audioPlayer: AudioPlayer
     private lateinit var leftTextBox: TextView
     private lateinit var rightTextBox: TextView
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "TTS Initialization failed!", Toast.LENGTH_SHORT).show()
             }
         }
-        translatorManager = TranslatorManager(speechRecognition, textToSpeech, translate)
+//        translatorManager = TranslatorManager(speechRecognition, textToSpeech, translate)
 
         textToSpeech = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
@@ -157,20 +157,26 @@ class MainActivity : AppCompatActivity() {
         val targetLanguageCode = getLanguageCode(targetLanguage)
 
         // Start continuous speech recognition
-        speechRecognition.startListening(sourceLanguageCode) { recognizedText ->
-            runOnUiThread {
-                if (isLeft) {
-                    leftTextBox.text = recognizedText
-                } else {
-                    rightTextBox.text = recognizedText
+        speechRecognition.recognizeSpeech(sourceLanguageCode) { recognizedText ->
+            if (isLeft) {
+                leftTextBox.text = recognizedText
+            } else {
+                rightTextBox.text = recognizedText
+            }
+            translate.translateText(recognizedText, sourceLanguage, targetLanguage) { translatedText ->
+                runOnUiThread {
+                    if (isLeft) {
+                        rightTextBox.text = translatedText
+                    } else {
+                        leftTextBox.text = translatedText
+                    }
+
+                    val locale = Locale.forLanguageTag(getLanguageCode(targetLanguage))
+                    audioPlayer.speakThroughEarphone(translatedText, isLeft, locale)
                 }
             }
-
-            // Process translation through TranslatorManager3
-            translatorManager.processSpeechInput(recognizedText, sourceLanguageCode, targetLanguageCode, isLeft)
         }
     }
-
     private fun getLanguageCode(language: String): String {
         return when (language.lowercase()) {
             "english" -> "en"
