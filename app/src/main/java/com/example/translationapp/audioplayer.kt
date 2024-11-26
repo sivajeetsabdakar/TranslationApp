@@ -1,82 +1,89 @@
 package com.example.translationapp
 
 import android.content.Context
-import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
-import android.os.Build
+import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import android.widget.Toast
+import java.io.File
+import java.util.Locale
 
-class AudioPlayer(private val context: Context) {
+class AudioPlayer(private val context: Context, private val textToSpeech: TextToSpeech) {
 
-    private val audioManager: AudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    fun speakThroughEarphone(text: String, isLeft: Boolean, language: Locale) {
+        val audioFile = File(context.filesDir, "tts_output.wav")
 
-    private lateinit var audioTrack: AudioTrack
-
-    init {
-        setupAudioTrack()
-    }
-
-    private fun setupAudioTrack() {
-        // Set up the AudioTrack for stereo output
-        val sampleRate = 44100 // Standard sample rate for music playback
-        val channelConfig = AudioFormat.CHANNEL_OUT_STEREO
-        val audioFormat = AudioFormat.ENCODING_PCM_16BIT // Standard 16-bit PCM audio
-
-        val bufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat)
-
-        audioTrack = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AudioTrack.Builder()
-                .setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build()
-                )
-                .setAudioFormat(
-                    AudioFormat.Builder()
-                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                        .setSampleRate(sampleRate)
-                        .setChannelMask(channelConfig)
-                        .build()
-                )
-                .setBufferSizeInBytes(bufferSize)
-                .build()
-        } else {
-            AudioTrack(
-                AudioManager.STREAM_MUSIC,
-                sampleRate,
-                channelConfig,
-                audioFormat,
-                bufferSize,
-                AudioTrack.MODE_STREAM
-            )
+        // Set the desired language
+        val result = textToSpeech.setLanguage(language)
+        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            Toast.makeText(context, "Selected language is not supported", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        // Set a specific voice if available (optional)
+        val voices = textToSpeech.voices
+        val selectedVoice = voices.find { it.locale == language && !it.isNetworkConnectionRequired }
+        selectedVoice?.let {
+            textToSpeech.voice = it
+        }
+
+        val params = Bundle().apply {
+            putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "ttsOutput")
+        }
+
+        textToSpeech.synthesizeToFile(text, params, audioFile, "ttsOutput")
+
+        textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {}
+            override fun onDone(utteranceId: String?) {
+                if (utteranceId == "ttsOutput") {
+                    playStereoAudioWithPan(audioFile, isLeft)
+                }
+            }
+
+            override fun onError(utteranceId: String?) {
+                Toast.makeText(context, "Failed to synthesize audio.", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
-    fun setAudioRouting(isLeftEarphone: Boolean) {
-        if (audioTrack.state == AudioTrack.STATE_INITIALIZED) {
-            if (isLeftEarphone) {
-                // Set maximum volume on the left channel, mute the right channel
-                audioTrack.setStereoVolume(1.0f, 0.0f)
+    private fun playStereoAudioWithPan(audioFile: File, isLeft: Boolean) {
+        val monoData = audioFile.readBytes()
+
+        // Convert mono audio to stereo
+        val stereoData = ByteArray(monoData.size * 2)
+        for (i in monoData.indices step 2) {
+            val sample = monoData[i].toInt() or (monoData[i + 1].toInt() shl 8)
+            if (!isLeft) {
+                // Left channel active, right channel silent
+                stereoData[i * 2] = monoData[i] // Left channel
+                stereoData[i * 2 + 1] = monoData[i + 1]
+                stereoData[i * 2 + 2] = 0 // Right channel muted
+                stereoData[i * 2 + 3] = 0
             } else {
-                // Set maximum volume on the right channel, mute the left channel
-                audioTrack.setStereoVolume(0.0f, 1.0f)
+                // Right channel active, left channel silent
+                stereoData[i * 2] = 0 // Left channel muted
+                stereoData[i * 2 + 1] = 0
+                stereoData[i * 2 + 2] = monoData[i] // Right channel
+                stereoData[i * 2 + 3] = monoData[i + 1]
             }
         }
-    }
 
-    fun playAudio(audioData: ByteArray) {
-        if (audioTrack.state == AudioTrack.STATE_INITIALIZED) {
-            audioTrack.play()
-            audioTrack.write(audioData, 0, audioData.size)
-        }
-    }
+        // Configure AudioTrack for stereo output
+        val audioTrack = AudioTrack(
+            AudioManager.STREAM_MUSIC,
+            22000, // Sample rate
+            AudioFormat.CHANNEL_OUT_STEREO, // Stereo audio
+            AudioFormat.ENCODING_PCM_16BIT, // 16-bit PCM
+            stereoData.size,
+            AudioTrack.MODE_STATIC
+        )
 
-    fun stopAudio() {
-        if (audioTrack.state == AudioTrack.STATE_INITIALIZED) {
-            audioTrack.stop()
-            audioTrack.release()
-        }
+        // Write and play stereo audio
+        audioTrack.write(stereoData, 0, stereoData.size)
+        audioTrack.play()
     }
 }

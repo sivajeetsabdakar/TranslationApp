@@ -90,7 +90,7 @@ import android.speech.tts.UtteranceProgressListener
 //            "burmese" -> Locale("my")
 //            "armenian" -> Locale("hy")
 //            "georgian" -> Locale("ka")
-//            "khmer" -> Locale("km")
+//            "khmer" -> Locale("km")z
 //            "lao" -> Locale("lo")
 //            "malagasy" -> Locale("mg")
 //            "sinhala" -> Locale("si")
@@ -107,52 +107,4 @@ import android.speech.tts.UtteranceProgressListener
 //
 //
 //}
-
-
-class TranslatorManager(
-    private val speechRecognition: SpeechRecognition,
-    private val textToSpeech: TextToSpeech,
-    private val translate: Translate // Inject Translate class
-) {
-    private val translationQueue: MutableList<String> = mutableListOf()
-    private var isSpeaking = false
-
-    fun processSpeechInput(inputText: String, sourceLang: String, targetLang: String) {
-        if (!isSpeaking) {
-            translate.translateText(inputText, sourceLang, targetLang) { translatedText ->
-                translationQueue.add(translatedText)
-                playTranslationQueue()
-            }
-        }
-    }
-
-    private fun playTranslationQueue() {
-        if (translationQueue.isNotEmpty()) {
-            isSpeaking = true
-            val textToSpeak = translationQueue.removeAt(0)
-
-            textToSpeech.speak(textToSpeak, TextToSpeech.QUEUE_ADD, null, null)
-
-            textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                override fun onStart(utteranceId: String?) {}
-
-                override fun onDone(utteranceId: String?) {
-                    isSpeaking = false
-                    if (translationQueue.isNotEmpty()) {
-                        playTranslationQueue() // Play next item in the queue
-                    } else {
-                        // Resume listening after playback
-                        speechRecognition.startListening("en") { input ->
-                            processSpeechInput(input, "en", "hi") // Replace with dynamic languages if needed
-                        }
-                    }
-                }
-
-                override fun onError(utteranceId: String?) {
-                    isSpeaking = false
-                }
-            })
-        }
-    }
-}
 

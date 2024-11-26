@@ -1,21 +1,20 @@
 package com.example.translationapp
 
 import Translate
+import TranslatorManager
 import android.content.pm.PackageManager
+import android.media.AudioFormat
+import android.media.AudioManager
+import android.media.AudioTrack
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-//import android.view.Gravity
+import android.speech.tts.UtteranceProgressListener
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-//import kotlinx.coroutines.CoroutineScope
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.launch
-//import kotlinx.coroutines.withContext
-//import java.util.Locale
 import androidx.core.content.ContextCompat
+import java.io.File
 import java.util.Locale
-//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 
 class MainActivity : AppCompatActivity() {
@@ -55,6 +54,12 @@ class MainActivity : AppCompatActivity() {
         }
         translatorManager = TranslatorManager(speechRecognition, textToSpeech, translate)
 
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                textToSpeech.language = Locale.ENGLISH // Default language
+            }
+        }
+        audioPlayer = AudioPlayer(this, textToSpeech)
 
         // Find UI elements by ID
         leftButton = findViewById(R.id.leftButton)
@@ -126,7 +131,18 @@ class MainActivity : AppCompatActivity() {
         val targetLanguage = if (isLeft) rightLanguageDropdown.selectedItem.toString() else leftLanguageDropdown.selectedItem.toString()
 
         if (inputText.isNotEmpty()) {
-            translatorManager.processSpeechInput(inputText, getLanguageCode(sourceLanguage), getLanguageCode(targetLanguage))
+            val translator = Translate()
+            translator.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
+                runOnUiThread {
+                    if (isLeft) {
+                        rightEditText.setText(translatedText)
+                    } else {
+                        leftEditText.setText(translatedText)
+                    }
+                }
+                val locale = Locale.forLanguageTag(getLanguageCode(targetLanguage))
+                audioPlayer.speakThroughEarphone(translatedText, isLeft, locale)
+            }
         } else {
             Toast.makeText(this, "Please enter text to translate.", Toast.LENGTH_SHORT).show()
         }
@@ -150,13 +166,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Process translation through TranslatorManager
-            translatorManager.processSpeechInput(recognizedText, sourceLanguageCode, targetLanguageCode)
+            // Process translation through TranslatorManager3
+            translatorManager.processSpeechInput(recognizedText, sourceLanguageCode, targetLanguageCode, isLeft)
         }
     }
-
-
-
 
     private fun getLanguageCode(language: String): String {
         return when (language.lowercase()) {
@@ -216,7 +229,6 @@ class MainActivity : AppCompatActivity() {
             else -> "en"  // Default to English if not found
         }
     }
-
     private fun getLanguagesArray(): Array<String> {
         return arrayOf(
             "English",
@@ -265,14 +277,12 @@ class MainActivity : AppCompatActivity() {
             "Chinese (Traditional)"
         )
     }
-
-
     override fun onDestroy() {
-        super.onDestroy()
         // Shutdown TTS to free up resources
         if (::textToSpeech.isInitialized) {
             textToSpeech.stop()
             textToSpeech.shutdown()
         }
+        super.onDestroy()
     }
 }
