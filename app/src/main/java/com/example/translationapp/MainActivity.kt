@@ -3,17 +3,12 @@ package com.example.translationapp
 import Translate
 //import TranslatorManager
 import android.content.pm.PackageManager
-import android.media.AudioFormat
-import android.media.AudioManager
-import android.media.AudioTrack
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.io.File
 import java.util.Locale
 
 
@@ -155,9 +150,10 @@ class MainActivity : AppCompatActivity() {
 
         val sourceLanguageCode = getLanguageCode(sourceLanguage)
         val targetLanguageCode = getLanguageCode(targetLanguage)
+        val sourceLanguageCodeforSR = getLanguageCodeforSR(sourceLanguage)
 
         // Start continuous speech recognition
-        speechRecognition.recognizeSpeech(sourceLanguageCode) { recognizedText ->
+        speechRecognition.recognizeSpeech(sourceLanguageCodeforSR) { recognizedText ->
             if (isLeft) {
                 leftTextBox.text = recognizedText
             } else {
@@ -177,6 +173,66 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun getLanguageCodeforSR(sourceLanguage: String): String {
+        return when (sourceLanguage.lowercase()) {
+            "english" -> "en-US"
+            "spanish" -> "es-ES"
+            "french" -> "fr-FR"
+            "german" -> "de-DE"
+            "hindi" -> "hi-IN"
+            "arabic" -> "ar-SA"
+            "bengali" -> "bn-IN"
+            "chinese" -> "zh-CN"
+            "dutch" -> "nl-NL"
+            "italian" -> "it-IT"
+            "japanese" -> "ja-JP"
+            "korean" -> "ko-KR"
+            "malay" -> "ms-MY"
+            "portuguese" -> "pt-PT"
+            "russian" -> "ru-RU"
+            "turkish" -> "tr-TR"
+            "vietnamese" -> "vi-VN"
+            "thai" -> "th-TH"
+            "filipino" -> "fil-PH"
+            "swedish" -> "sv-SE"
+            "norwegian" -> "no-NO"
+            "danish" -> "da-DK"
+            "finnish" -> "fi-FI"
+            "hebrew" -> "he-IL"
+            "swahili" -> "sw-TZ"
+            "ukrainian" -> "uk-UA"
+            "czech" -> "cs-CZ"
+            "hungarian" -> "hu-HU"
+            "romanian" -> "ro-RO"
+            "slovak" -> "sk-SK"
+            "bulgarian" -> "bg-BG"
+            "croatian" -> "hr-HR"
+            "serbian" -> "sr-RS"
+            "slovenian" -> "sl-SI"
+            "lithuanian" -> "lt-LT"
+            "latvian" -> "lv-LV"
+            "estonian" -> "et-EE"
+            "persian" -> "fa-IR"
+            "telugu" -> "te-IN"
+            "tamil" -> "ta-IN"
+            "marathi" -> "mr-IN"
+            "kannada" -> "kn-IN"
+            "punjabi" -> "pa-IN"
+            "gujarati" -> "gu-IN"
+            "burmese" -> "my-MM"
+            "armenian" -> "hy-AM"
+            "georgian" -> "ka-GE"
+            "khmer" -> "km-KH"
+            "lao" -> "lo-LA"
+            "malagasy" -> "mg-MG"
+            "sinhala" -> "si-LK"
+            "tigrinya" -> "ti-ER"
+            "yiddish" -> "yi-YI"
+            else -> "en-US"  // Default to English (US)
+        }
+    }
+
     private fun getLanguageCode(language: String): String {
         return when (language.lowercase()) {
             "english" -> "en"

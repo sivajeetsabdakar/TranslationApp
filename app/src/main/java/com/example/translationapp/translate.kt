@@ -17,6 +17,7 @@ class Translate {
 
         val request = Request.Builder()
             .url("http://10.0.2.2:5000/translate")  // Emulator IP, change for production
+//            .url("http://192.168.1.16:5000/translate")  // Emulator IP, change for production
             .post(requestBody)
             .build()
 
