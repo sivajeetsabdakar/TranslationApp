@@ -26,6 +26,8 @@ import android.content.pm.PackageManager
 import android.speech.tts.TextToSpeech
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.Locale
@@ -128,11 +130,13 @@ class MainActivity : ComponentActivity() {
                     )
                     Button(
                         onClick = {
+
                             if (leftText.isNotEmpty()) {
                                 handleTextInput(
                                     inputText = leftText,
                                     sourceLanguage = leftLanguage,
                                     targetLanguage = rightLanguage,
+                                    isLeft = true,
                                     onTranslationResult = { rightText = it }
                                 )
                             } else {
@@ -162,6 +166,7 @@ class MainActivity : ComponentActivity() {
                                     inputText = rightText,
                                     sourceLanguage = rightLanguage,
                                     targetLanguage = leftLanguage,
+                                    isLeft = false,
                                     onTranslationResult = { leftText = it }
                                 )
                             } else {
@@ -254,11 +259,11 @@ class MainActivity : ComponentActivity() {
 //        }
 //    }
 
-    private fun handleTextInput(inputText: String, sourceLanguage: String, targetLanguage: String, onTranslationResult: (String) -> Unit) {
+    private fun handleTextInput(inputText: String, sourceLanguage: String, targetLanguage: String, isLeft: Boolean, onTranslationResult: (String) -> Unit) {
         translate.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
             runOnUiThread { onTranslationResult(translatedText) }
             val locale = Locale.forLanguageTag(getLanguageCode(targetLanguage))
-            audioPlayer.speakThroughEarphone(translatedText, true, locale)
+            audioPlayer.speakThroughEarphone(translatedText, isLeft, locale)
         }
     }
 
@@ -333,7 +338,6 @@ class MainActivity : ComponentActivity() {
             else -> "en-US"  // Default to English (US)
         }
     }
-
     private fun getLanguageCode(language: String): String {
         return when (language.lowercase()) {
             "english" -> "en"

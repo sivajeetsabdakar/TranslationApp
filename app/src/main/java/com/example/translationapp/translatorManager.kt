@@ -1,3 +1,5 @@
+package com.example.translationapp
+
 //import android.media.AudioFormat
 //import android.media.AudioManager
 //import android.media.AudioTrack
