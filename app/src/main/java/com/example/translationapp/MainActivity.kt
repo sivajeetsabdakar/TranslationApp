@@ -1,6 +1,5 @@
 package com.example.translationapp
 
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -10,22 +9,15 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.translationapp.ui.theme.TranslationAppTheme
 import Translate
-//import TranslatorManager
 import android.content.pm.PackageManager
 import android.speech.tts.TextToSpeech
-import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.core.app.ActivityCompat
@@ -130,7 +122,6 @@ class MainActivity : ComponentActivity() {
                     )
                     Button(
                         onClick = {
-
                             if (leftText.isNotEmpty()) {
                                 handleTextInput(
                                     inputText = leftText,
@@ -244,20 +235,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-//    private fun checkPermissions() {
-//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO_PERMISSION)
-//        }
-//    }
-
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
-//            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(this, "Permission required to use speech recognition", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//    }
 
     private fun handleTextInput(inputText: String, sourceLanguage: String, targetLanguage: String, isLeft: Boolean, onTranslationResult: (String) -> Unit) {
         translate.translateText(inputText, sourceLanguage, targetLanguage) { translatedText ->
