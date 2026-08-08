@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="primaryColor">#60A5FA</color>
+    <color name="primaryColorDark">#1E3A8A</color>
+    <color name="primaryColorLight">#1E3A5F</color>
+    <color name="accentColor">#FDBA74</color>
+    <color name="accentColorDark">#EA580C</color>
+    <color name="errorColor">#FCA5A5</color>
+    <color name="screenBackgroundStart">#07111F</color>
+    <color name="screenBackgroundEnd">#10233F</color>
+    <color name="surfaceColor">#111827</color>
+    <color name="surfaceSoft">#172033</color>
+    <color name="textPrimary">#F8FAFC</color>
+    <color name="textSecondary">#CBD5E1</color>
+    <color name="outlineColor">#334155</color>
+    <color name="buttonPressedOverlay">#33FFFFFF</color>
+    <color name="inputFill">#0F172A</color>
+</resources>

@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+keystore.properties
+*.jks
+*.keystore
+app/google-services.json
+node_modules/
+backend/node_modules/
+backend/secrets/
+flutter_app/build/

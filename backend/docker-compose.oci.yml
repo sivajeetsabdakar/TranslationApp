@@ -1,0 +1,20 @@
+services:
+  vocalingo-backend:
+    build:
+      context: .
+    image: vocalingo-backend:latest
+    container_name: vocalingo-backend
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    volumes:
+      - ./secrets/google-sa.json:/app/secrets/google-sa.json:ro
+    expose:
+      - "8080"
+    networks:
+      - caddy
+
+networks:
+  caddy:
+    external: true
+    name: whatsnew_default
