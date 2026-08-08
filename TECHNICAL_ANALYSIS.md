@@ -8,8 +8,7 @@ This project is a bilingual live-translation mobile system with two running comp
 
 - `TranslationApp/app`: Android app (Kotlin + Jetpack Compose) that captures speech, streams PCM audio + VAD state over WebSocket, and plays back translated speech.
 - `TranslationApp/backend`: Node.js WebSocket gateway that handles STT → transcript chunking → translate → TTS and returns translated audio chunks.
-
-There is also a parallel Flutter folder under `TranslationApp/flutter_app/`, but the production-grade implementation reflected here is the native Android module + Node backend.
+- `TranslationApp/site`: static Vercel showcase page with app screenshots, architecture image, and recruiter/developer project notes.
 
 ## 2) Core Objective and UX Flow
 

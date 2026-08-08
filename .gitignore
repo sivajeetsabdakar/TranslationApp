@@ -20,5 +20,4 @@ app/google-services.json
 node_modules/
 backend/node_modules/
 backend/secrets/
-flutter_app/build/
 .vercel/
