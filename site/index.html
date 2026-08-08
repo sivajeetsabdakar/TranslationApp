@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="VocaLingo is a native Android streaming translator for two people sharing one phone and separate earbud channels."
+    />
+    <title>VocaLingo | Streaming Earbud Translator</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar" aria-label="Primary">
+      <a class="brand" href="#top" aria-label="VocaLingo home">
+        <span class="brand-mark">VL</span>
+        <span>VocaLingo</span>
+      </a>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#architecture">Architecture</a>
+        <a href="#technical">Technical</a>
+        <a href="#readiness">Readiness</a>
+      </nav>
+      <a class="github-link" href="https://github.com/sivajeetsabdakar/Vocalingo" target="_blank" rel="noreferrer">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path
+            d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.74.08-.74 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.82 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.46-1.33-5.46-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.3c0 .32.22.7.83.58A12 12 0 0 0 12 .5Z"
+          />
+        </svg>
+        GitHub
+      </a>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Native Android + OCI gateway + Google Cloud AI</p>
+          <h1>Streaming translation for two people sharing one phone.</h1>
+          <p class="lead">
+            VocaLingo captures speech, detects phrase boundaries, streams audio to a secure backend,
+            translates stable chunks, and routes synthesized speech to the other user's ear channel.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="https://github.com/sivajeetsabdakar/Vocalingo" target="_blank" rel="noreferrer">
+              View Repository
+            </a>
+            <a class="button secondary" href="#architecture">See Architecture</a>
+          </div>
+          <dl class="metrics" aria-label="Project highlights">
+            <div>
+              <dt>2-4s</dt>
+              <dd>target phrase-end delay</dd>
+            </div>
+            <div>
+              <dt>WSS</dt>
+              <dd>production backend transport</dd>
+            </div>
+            <div>
+              <dt>11</dt>
+              <dd>initial language targets</dd>
+            </div>
+          </dl>
+        </div>
+        <figure class="phone-shot">
+          <img src="./assets/app-screen.png" alt="VocaLingo Android split-screen app screenshot" />
+        </figure>
+      </section>
+
+      <section class="band summary-grid" aria-label="System summary">
+        <article>
+          <span class="icon">01</span>
+          <h2>Continuous Chunks</h2>
+          <p>Speech is segmented by STT finals, punctuation, silence timing, stable partials, and max duration.</p>
+        </article>
+        <article>
+          <span class="icon">02</span>
+          <h2>Stereo Routing</h2>
+          <p>Translated audio is queued and panned through AudioTrack so the listener hears the opposite speaker.</p>
+        </article>
+        <article>
+          <span class="icon">03</span>
+          <h2>Credential Safety</h2>
+          <p>Google Cloud credentials remain on the backend; no service credentials are shipped in the APK.</p>
+        </article>
+      </section>
+
+      <section id="architecture" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">System architecture</p>
+          <h2>Android capture, OCI gateway, Google Cloud AI pipeline.</h2>
+        </div>
+        <figure class="architecture-card">
+          <img src="./assets/architecture.png" alt="VocaLingo streaming translation architecture diagram" />
+        </figure>
+      </section>
+
+      <section id="technical" class="section two-column">
+        <div class="section-heading sticky-heading">
+          <p class="eyebrow">Technical details</p>
+          <h2>Built for understandable low-latency conversation.</h2>
+          <p>
+            The implementation prioritizes production-shaped boundaries: native audio capture on Android,
+            a backend session gateway, chunked interpretation, and observable cloud service calls.
+          </p>
+        </div>
+        <div class="detail-list">
+          <article>
+            <h3>Android App</h3>
+            <p>Kotlin, Jetpack Compose, Coroutines/Flow, AudioRecord at 16 kHz PCM mono, local VAD, and AudioTrack stereo playback.</p>
+          </article>
+          <article>
+            <h3>Backend Gateway</h3>
+            <p>Node.js WebSocket service on OCI with session lifecycle controls, validation, rate limits, chunking, and latency metrics.</p>
+          </article>
+          <article>
+            <h3>Google Cloud Pipeline</h3>
+            <p>Speech-to-Text streaming, Cloud Translation, and Cloud Text-to-Speech compose the core STT -> translation -> TTS path.</p>
+          </article>
+          <article>
+            <h3>Production Endpoint</h3>
+            <p>Android connects to <code>wss://vocalingo.duckdns.org/ws</code> through HTTPS/WSS proxying, with debug cleartext isolated to emulator builds.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="readiness" class="section readiness">
+        <div>
+          <p class="eyebrow">Validation</p>
+          <h2>Production-readiness work already in place.</h2>
+        </div>
+        <ul class="check-list">
+          <li>Release APK and AAB builds pass.</li>
+          <li>Android unit and instrumentation tests pass.</li>
+          <li>Backend unit tests and npm audit pass.</li>
+          <li>Live WSS smoke test returns transcript, translation, TTS audio, and latency metrics.</li>
+          <li>Firebase Crashlytics and Analytics are wired when config is present.</li>
+          <li>Release backup and device transfer are disabled for app data.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>VocaLingo</span>
+      <a href="https://github.com/sivajeetsabdakar/Vocalingo" target="_blank" rel="noreferrer">github.com/sivajeetsabdakar/Vocalingo</a>
+    </footer>
+  </body>
+</html>
