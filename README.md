@@ -4,6 +4,8 @@ VocaLingo is a native Android streaming translator for two people sharing one ph
 
 Live showcase: [vocalingo-showcase.vercel.app](https://vocalingo-showcase.vercel.app/)
 
+APK download: [VocaLingo.apk](https://vocalingo-showcase.vercel.app/assets/vocalingo.apk)
+
 ## Architecture
 
 ![VocaLingo streaming translation architecture](site/assets/architecture.png)
