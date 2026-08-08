@@ -256,8 +256,7 @@ h3 {
 
 .summary-grid p,
 .detail-list p,
-.section-heading p,
-.check-list {
+.section-heading p {
   color: var(--muted);
 }
 
@@ -309,35 +308,6 @@ code {
   font-size: 0.94em;
 }
 
-.readiness {
-  display: grid;
-  grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1fr);
-  gap: clamp(24px, 4vw, 56px);
-  background: linear-gradient(135deg, rgba(117, 167, 255, 0.09), rgba(139, 236, 111, 0.06));
-  border-top: 1px solid var(--line);
-}
-
-.check-list {
-  display: grid;
-  gap: 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.check-list li {
-  position: relative;
-  padding-left: 30px;
-}
-
-.check-list li::before {
-  position: absolute;
-  left: 0;
-  content: "+";
-  color: var(--green);
-  font-weight: 900;
-}
-
 .footer {
   display: flex;
   justify-content: space-between;
@@ -366,10 +336,6 @@ code {
 
   .hero,
   .two-column,
-  .readiness {
-    grid-template-columns: 1fr;
-  }
-
   .hero {
     min-height: auto;
   }
