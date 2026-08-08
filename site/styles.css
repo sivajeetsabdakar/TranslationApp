@@ -285,6 +285,62 @@ h3 {
   width: 100%;
 }
 
+.image-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.image-open:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px 24px;
+  background: rgba(3, 7, 14, 0.94);
+}
+
+.lightbox.is-open {
+  display: flex;
+}
+
+.lightbox img {
+  max-width: 96vw;
+  max-height: 88vh;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
 .two-column {
   display: grid;
   grid-template-columns: minmax(240px, 0.75fr) minmax(0, 1fr);
@@ -334,10 +390,12 @@ code {
     overflow-x: auto;
   }
 
-  .hero,
-  .two-column,
   .hero {
     min-height: auto;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr;
   }
 
   .sticky-heading {
@@ -366,6 +424,17 @@ code {
   .architecture-card img {
     width: 1040px;
     max-width: none;
+  }
+
+  .lightbox {
+    align-items: flex-start;
+    overflow: auto;
+  }
+
+  .lightbox img {
+    max-width: none;
+    width: 1100px;
+    max-height: none;
   }
 
   .footer {

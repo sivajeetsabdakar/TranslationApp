@@ -3,7 +3,6 @@ package com.vocalingo.app
 import android.Manifest
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,11 +25,11 @@ class ExampleInstrumentedTest {
     fun mainScreenShowsSplitConversationControls() {
         composeRule.onNodeWithText("VocaLingo").assertIsDisplayed()
         composeRule.onNodeWithTag("top-status-bar").assertIsDisplayed()
-        composeRule.onNodeWithTag("left-user-panel").assertIsDisplayed()
-        composeRule.onNodeWithTag("right-user-panel").assertIsDisplayed()
-        composeRule.onAllNodesWithText("Start mic")[0].assertIsDisplayed()
-        composeRule.onAllNodesWithText("Start mic")[1].assertIsDisplayed()
-        composeRule.onNodeWithText("Ear test").assertIsDisplayed()
+        composeRule.onNodeWithTag("user-1-panel").assertIsDisplayed()
+        composeRule.onNodeWithTag("user-2-panel").assertIsDisplayed()
+        composeRule.onNodeWithTag("user-1-mic-button").assertIsDisplayed()
+        composeRule.onNodeWithTag("user-2-mic-button").assertIsDisplayed()
+        composeRule.onNodeWithText("Test").assertIsDisplayed()
         composeRule.onNodeWithText("Stop").assertIsDisplayed()
     }
 

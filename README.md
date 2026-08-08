@@ -2,7 +2,7 @@
 
 VocaLingo is a native Android streaming translator for two people sharing one phone. Each person selects a language and uses a separate side of the screen. The app captures speech, streams audio to a backend gateway, translates stable speech chunks, synthesizes translated speech, and plays the result into the listener's ear channel.
 
-Live showcase: [site-three-pi-55.vercel.app](https://site-three-pi-55.vercel.app)
+Live showcase: [vocalingo-showcase.vercel.app](https://vocalingo-showcase.vercel.app/)
 
 ## Architecture
 
